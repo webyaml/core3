@@ -202,10 +202,11 @@ elif __name__.startswith('_mod_wsgi_'):
 	# File sessions
 	web.config.session_parameters['cookie_path'] = '/'
 	app = web.application(urls, globals())
-	app.run(Log)
 	session = web.session.Session(app, web.session.DiskStore('sessions'))
 	app.add_processor(web.loadhook(session_hook))
 	application = app.wsgifunc()
+	app.run(Log)
+	
 	# End File sessions
 	
 	'''
