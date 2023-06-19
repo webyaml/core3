@@ -44,7 +44,10 @@ class View(object):
 		
 		#start logging
 		loglevel = logging.INFO
-		logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S',level=loglevel)		
+		
+		
+		
+		logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S',level=loglevel, stream=logging.StreamHandler(sys.stdout))		
 
 		''' vars
 		'''
