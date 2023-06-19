@@ -1,16 +1,8 @@
 # path: lib/processors/
 # filename: ftp.py
 # description: WSGI application sugar api processors
+
 ''' 
-# make python2 strings and dictionaries behave like python3
-from __future__ import unicode_literals
-
-try:
-	from builtins import dict, str
-except ImportError:
-	from __builtin__ import dict, str
-	
-
 	Copyright 2017 Mark Madere
 
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,92 +29,133 @@ import classes.processor
 
 class Upload(classes.processor.Processor):
 
+	'''
+	# example usage
+	
+	process:
+		type: lib.processors.ftp.Upload
+		conf:
+			host: ftp.example.com
+			port: 21
+			user: myusername
+			pass: mysecret
+		file: relative/to/application/filename.ext
+		remotepath: /path/to/place/file/on/server/	
+	'''
+
 	def run(self):
 	
-		#debug
-		print('lib.processors.ftp.Upload')
+		conf = self.conf
+		debug = False
 		
-		
-		# FTP connection settings
-		conf = self.conf['conf']
+		if conf.get('debug'):
+			print('lib.processors.ftp.Upload')
+			debug = True
 
-		if 'host' not in conf:
-			print('missing smtp host')
-			
+		# ftp server conf
+
+		if 'conf' not in conf:
+			print('missing ftp configuration (conf)')
+			return False
+
+		if 'host' not in conf['conf']:
+			print('missing ftp host')
 			return False
 		
-		conf['port'] = int(conf.get('port',"21"))
+		conf['conf']['port'] = int(conf['conf'].get('port',"21"))
 			
-		if 'user' not in conf:
-			
-			print('missing smtp user')
-			
+		if 'user' not in conf['conf']:
+			print('missing ftp user')
 			return False			
 
-		if 'pass' not in conf:
-			
-			print('missing smtp pass')
-			
+		if 'pass' not in conf['conf']:
+			print('missing ftp pass')
 			return False
 			
-		# debug
-		#print(self.content.fnr(conf['user']),self.content.fnr(conf['pass']))
+		# file to upload
+		if 'file' not in conf:
+			print('missing file')
+			return False
 
-		ftp = ftplib.FTP(self.content.fnr(conf['host'])) #,self.content.fnr(conf['port'])
-		ftp.login(self.content.fnr(conf['user']),self.content.fnr(conf['pass']))
+		# connect to ftp server
+		ftp = ftplib.FTP(self.content.fnr(conf['conf']['host']))
+		ftp.login(self.content.fnr(conf['conf']['user']),self.content.fnr(conf['conf']['pass']))
 		
-		if 'remotepath' in self.conf:
-			ftp.cwd(self.content.fnr(self.conf['remotepath']))
+		# change remote directory (optional)
+		if 'remotepath' in conf:
+			ftp.cwd(self.content.fnr(conf['remotepath']))		
 		
-		
-		ftp.storbinary("STOR " + self.content.fnr(os.path.split(self.conf['file'])[1]), open(self.content.fnr(self.conf['file']), "rb"), 8192)
-		
+		# upload file
+		ftp.storbinary("STOR " + self.content.fnr(os.path.split(conf['file'])[1]), open(self.content.fnr(conf['file']), "rb"), 8192)
 		
 		return True
 
 
 class Download(classes.processor.Processor):
 
-	def run(self):
+	'''
+	# example usage
 	
-		#debug
-		print('lib.processors.ftp.Download')
-		
-		
-		# FTP connection settings
-		conf = self.conf['conf']
-
-		if 'host' not in conf:
-			print('missing smtp host')
+	process:
+		type: lib.processors.ftp.Download
+		conf:
+			host: ftp.example.com
+			port: 21
+			user: myusername
+			pass: mysecret
 			
+		file: filename.ext
+		remotepath: /path/to/retrieve/file/on/server/
+		localpath: save/file/relative/to/application/
+	'''
+
+	def run(self):
+
+		conf = self.conf
+		debug = False
+		
+		if conf.get('debug'):
+			print('lib.processors.ftp.Download')
+			debug = True
+
+		# ftp server conf
+
+		if 'conf' not in conf:
+			print('missing ftp configuration (conf)')
+			return False
+
+		if 'host' not in conf['conf']:
+			print('missing ftp host')
 			return False
 		
-		conf['port'] = int(conf.get('port',"21"))
+		conf['conf']['port'] = int(conf['conf'].get('port',"21"))
 			
-		if 'user' not in conf:
-			
-			print('missing smtp user')
-			
+		if 'user' not in conf['conf']:
+			print('missing ftp user')
 			return False			
 
-		if 'pass' not in conf:
-			
-			print('missing smtp pass')
-			
+		if 'pass' not in conf['conf']:
+			print('missing ftp pass')
 			return False
 			
-		# debug
-		#print(self.content.fnr(conf['user']),self.content.fnr(conf['pass']))
+		# file to upload
+		if 'file' not in conf:
+			print('missing file')
+			return False
 
-		ftp = ftplib.FTP(self.content.fnr(conf['host'])) #,self.content.fnr(conf['port'])
-		ftp.login(self.content.fnr(conf['user']),self.content.fnr(conf['pass']))
+		# connect to ftp server
+		ftp = ftplib.FTP(self.content.fnr(conf['conf']['host']))
+		ftp.login(self.content.fnr(conf['conf']['user']),self.content.fnr(conf['conf']['pass']))
 		
-		if 'remotepath' in self.conf:
-			ftp.cwd(self.content.fnr(self.conf['remotepath']))
+		# change remote directory (optional)
+		if 'remotepath' in conf:
+			ftp.cwd(self.content.fnr(conf['remotepath']))		
 
-		localpath = self.content.fnr(self.conf.get('localpath','.'))	
+		# define local path
+		localpath = self.content.fnr(conf.get('localpath','.'))	
 		
-		ftp.retrbinary("RETR " +  self.content.fnr(self.conf['file']) ,open("%s/%s"%(localpath,self.content.fnr(os.path.split(self.conf['file'])[1])), 'wb').write)
+		# Download file
+		ftp.retrbinary("RETR " +  self.content.fnr(conf['file']) ,open("%s/%s"%(localpath,self.content.fnr(os.path.split(conf['file'])[1])), 'wb').write)
 		
 		return True
 

@@ -1,16 +1,7 @@
-# path:  classes
+# path:  core/classes/
 # filename: configuration.py
 # description: application configuration class
 ''' 
-# make python2 strings and dictionaries behave like python3
-from __future__ import unicode_literals
-
-try:
-	from builtins import dict, str
-except ImportError:
-	from __builtin__ import dict, str
-	
-
 	Copyright 2017 Mark Madere
 
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,6 +22,7 @@ except ImportError:
 '''
 import web
 import yaml
+import logging
 
 #import datetime
 import os
@@ -85,7 +77,7 @@ class Configuration(object):
 				if aliases:
 					
 					# allow aliases to be a string. convert to list
-					if isinstance(aliases,basestring):
+					if isinstance(aliases,str):
 						aliases = [aliases]
 					
 					if isinstance(aliases,list):
@@ -183,7 +175,8 @@ class Configuration(object):
 		#self.fix_redeclared_anchors(content)
 		
 		try:
-			conf = yaml.load(content)
+			#conf = yaml.load(content) #PyYAML < 5.1
+			conf = yaml.load(content, Loader=yaml.SafeLoader) #PyYAML >= 5.1
 			
 		except Exception as e:
 			
@@ -222,7 +215,8 @@ value: |
 		</body>
 	</html>
 		'''
-			conf = yaml.load(newcontent.replace("\t","    "))
+			#conf = yaml.load(newcontent.replace("\t","    ")) #PyYAML < 5.1
+			conf = yaml.load(newcontent.replace("\t","    "), Loader=yaml.SafeLoader) #PyYAML >= 5.1
 		
 			conf['e'] = {}
 			conf['e']['message'] = e
@@ -310,7 +304,9 @@ value: |
 
 					#debug
 					#print("found file '%s' in local dir" % file)
-					print("reading '%s'" %file)
+					#print("reading '%s'" %file)
+					#self.view.log("reading '%s'" %file,'info')
+					logging.info('INFO Loading file "%s"' %file)
 
 					# read config file
 					f = open(file, 'r')
@@ -325,7 +321,8 @@ value: |
 				# does configuration file exist in framework dir
 				elif os.path.isfile("core/%s" % file):
 					
-					print("reading '%s'" %file)
+					#print("reading '%s'" %file)
+					logging.info('INFO Loading file "%s"' %file)
 					
 					#debug
 					#print("found file '%s' in core dir" % file)				
@@ -344,7 +341,8 @@ value: |
 				else:
 					
 					# debug
-					print("Config Error:  The configuration file '%s' was not found." % file)
+					#print('Config Error:  The configuration file %s was not found.'% file)
+					logging.error('ERROR  File not found "%s"'%file)
 					
 					return False
 			

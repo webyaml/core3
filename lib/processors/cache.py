@@ -1,16 +1,8 @@
 # path: lib/processors/
 # filename: cache.py
-# description: WSGI application cache processors
+# description: processor to cache values in temporary storage
+# note: this method is depricated by dataObjCreate
 ''' 
-# make python2 strings and dictionaries behave like python3
-from __future__ import unicode_literals
-
-try:
-	from builtins import dict, str
-except ImportError:
-	from __builtin__ import dict, str
-	
-
 	Copyright 2017 Mark Madere
 
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,17 +31,28 @@ class Cache(classes.processor.Processor):
 	
 	def run(self):
 		
-		print('lib.processors.Cache')
+		self.view.log('Cache processor is depricated.  Consider using dataObjCreate instead.')
+		
+		conf = self.conf
+		debug = False
+		
+		if conf.get('debug'):
+			self.view.log('lib.processors.cache.Cache')
+			debug = True
+		
+		if not conf.get('cache'):
+			print('missing attribute cache')
+			return False
 
-		cache = self.conf.get('cache',{})
-
-		for var in cache:
+		if not isinstance(conf['cache'],dict):
+			print('attribute cache is not a dict')
+			return False
 			
-			markup = self.content.fnr(cache[var])
+		for var in conf['cache']:
 			
-			print(type(markup))
+			if debug:
+				print('caching %s'%var)
 			
-			self.top.cache[var] = markup
+			self.top.cache[var] = self.content.fnr(conf['cache'][var])
 	
 		return True
-

@@ -1,16 +1,8 @@
 # path: lib/processors
 # filename: fiddle.py
 # description: WSGI application fiddle processor
+
 ''' 
-# make python2 strings and dictionaries behave like python3
-from __future__ import unicode_literals
-
-try:
-	from builtins import dict, str
-except ImportError:
-	from __builtin__ import dict, str
-	
-
 	Copyright 2017 Mark Madere
 
 	Licensed under the Apache License, Version 2.0 (the "License");

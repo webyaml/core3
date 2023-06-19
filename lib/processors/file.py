@@ -1,16 +1,8 @@
 # path: lib/processors
 # filename: wifi.py
 # description: WSGI application file processors
+
 ''' 
-# make python2 strings and dictionaries behave like python3
-from __future__ import unicode_literals
-
-try:
-	from builtins import dict, str
-except ImportError:
-	from __builtin__ import dict, str
-	
-
 	Copyright 2017 Mark Madere
 
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -96,7 +88,7 @@ class Write(classes.processor.Processor):
 		if directory:
 		
 			if not os.path.isdir(directory):
-				os.makedirs(directory, 0775)
+				os.makedirs(directory, 0o775)
 		else:
 			path = "./%s"%path
 		
@@ -144,13 +136,7 @@ class Read(classes.processor.Processor):
 			
 		# debug
 		print("found file '%s'." %conf["path"])
-
-
-		if conf.get('backup'):
 		
-			# keep a copy of opened file with timestamp.
-			shutil.copy(conf["path"],conf["path"]+"."+str(int(time.time()))+".bak")
-			
 		f = open(conf["path"], 'r')
 		contents = f.read()
 		f.close()
@@ -355,6 +341,6 @@ class Mkdir(classes.processor.Processor):
 		if directory:
 		
 			if not os.path.isdir(directory):
-				os.makedirs(directory, 0775)
+				os.makedirs(directory, 0o775)
 				
 		return True

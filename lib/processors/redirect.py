@@ -1,16 +1,8 @@
 # path: lib/processors/
 # filename: redirect.py
 # description: WSGI application redirect processors
+
 ''' 
-# make python2 strings and dictionaries behave like python3
-from __future__ import unicode_literals
-
-try:
-	from builtins import dict, str
-except ImportError:
-	from __builtin__ import dict, str
-	
-
 	Copyright 2017 Mark Madere
 
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,8 +35,6 @@ class Redirect(classes.processor.Processor):
 		
 		conf = self.conf
 		
-		
-		
 		if not conf.get('url'):
 			
 			print('Redirect url not found')
@@ -59,11 +49,8 @@ class Redirect(classes.processor.Processor):
 			markers = list(set(pattern.findall(conf['url'])))
 
 			for marker in markers:
-				conf['url'] = unicode(conf['url'].replace(marker,''))		
+				conf['url'] = conf['url'].replace(marker,'')
 		
 		raise web.seeother(conf['url'])
 		
-		return True  # this should never execute
-		
-
-	
+		return True  # this should never execute	

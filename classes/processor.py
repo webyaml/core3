@@ -2,15 +2,6 @@
 # filename: processor.py
 # description: WSGI application processor
 ''' 
-# make python2 strings and dictionaries behave like python3
-from __future__ import unicode_literals
-
-try:
-	from builtins import dict, str
-except ImportError:
-	from __builtin__ import dict, str
-
-
 	Copyright 2017 Mark Madere
 
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,6 +30,9 @@ import copy
 class Processor(object):
 
 	def __init__(self,content,conf):
+
+		''' 	Default Processor Class
+		'''
 		
 		# vars
 		self.conf = copy.copy(conf)
@@ -51,7 +45,6 @@ class Processor(object):
 		self.top = self.content.top
 		self.parent = self.content.parent
 		
-		#self.data = None
 		self.data = self.content.data
 		
 		return None

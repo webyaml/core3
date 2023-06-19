@@ -1,16 +1,8 @@
 # path: lib/processors
 # filename: rest.py
 # description: WSGI application ReSTful processors
+
 ''' 
-# make python2 strings and dictionaries behave like python3
-from __future__ import unicode_literals
-
-try:
-	from builtins import dict, str
-except ImportError:
-	from __builtin__ import dict, str
-	
-
 	Copyright 2017 Mark Madere
 
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +21,6 @@ except ImportError:
 ''' external imports
 '''
 import requests
-import traceback
 
 '''
 import json
@@ -127,7 +118,7 @@ class GET(Rest):
 		if debug:
 			print('making request')
 		
-		r = requests.get(conf['url'], verify=False, headers=conf['headers'], auth=auth, cookies=cookiejar)
+		r = requests.get(conf['url'], verify=False, headers=conf['headers'], auth=conf['auth'], cookies=cookiejar)
 
 		if debug:
 			print('request complete')
@@ -166,7 +157,7 @@ class POST(Rest):
 
 		if conf.get('debug'):
 			
-			print('lib.processors.rest.POST')
+			print('ib.processors.rest.POST')
 			debug = True			
 
 		
@@ -209,10 +200,6 @@ class POST(Rest):
 				auth = (conf['auth']['username'],conf['auth']['password'])
 			except:
 				pass
-				
-		if debug:
-			
-			print(auth.__repr__())
 		
 		# is data being loaded to send?
 		if conf.get('send'):
@@ -247,23 +234,23 @@ class POST(Rest):
 		
 		try:
 		
-			if isinstance(self.content.data, basestring):
+			if isinstance(self.content.data, str):
 		
 				#make request
-				r = requests.post(conf['url'], verify=False, headers=conf['headers'], auth=auth, data=self.content.data.encode("utf-8"), cookies=cookiejar)
+				r = requests.post(conf['url'], verify=False, headers=conf['headers'], auth=conf['auth'], data=self.content.data.encode("utf-8"), cookies=cookiejar)
 			
 			else:
 				#make request
-				r = requests.post(conf['url'], verify=False, headers=conf['headers'], auth=auth, data=self.content.data, cookies=cookiejar)
+				r = requests.post(conf['url'], verify=False, headers=conf['headers'], auth=conf['auth'], data=self.content.data, cookies=cookiejar)
 				
 			if debug:
 				print("POST return")
 				print(r.text)
 		
-		except:
+		except Exception as e:
 			
 			if debug:
-				traceback.print_exc()
+				print(e)
 			
 			return False
 				

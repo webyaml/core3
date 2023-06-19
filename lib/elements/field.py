@@ -1,16 +1,8 @@
 # path: lib/elements/
 # filename: field.py
 # description: WSGI application html form fields
+
 ''' 
-# make python2 strings and dictionaries behave like python3
-from __future__ import unicode_literals
-
-try:
-	from builtins import dict, str
-except ImportError:
-	from __builtin__ import dict, str
-
-
 	Copyright 2017 Mark Madere
 
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,9 +26,9 @@ import traceback
 ''' internal imports
 '''
 import classes.element
-import field_dropdown
-import field_radio
-import field_html5
+import lib.elements.field_dropdown as field_dropdown
+import lib.elements.field_radio as field_radio
+import lib.elements.field_html5 as field_html5
 
 ''' Base Form Field Class
 '''

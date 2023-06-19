@@ -1,16 +1,8 @@
 # path: lib/processors
 # filename: logic.py
 # description: WSGI application logic processors
+
 ''' 
-# make python2 strings and dictionaries behave like python3
-from __future__ import unicode_literals
-
-try:
-	from builtins import dict, str
-except ImportError:
-	from __builtin__ import dict, str
-	
-
 	Copyright 2017 Mark Madere
 
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,7 +32,7 @@ class Evaluate(classes.processor.Processor):
 	def run(self):
 		
 		conf = self.conf
-		debug = False		
+		debug = True		
 		
 		if conf.get('debug'):
 			
@@ -50,8 +42,6 @@ class Evaluate(classes.processor.Processor):
 		#print('lib.processors.logic.Evaluate')
 		
 		expression = conf.get('expression')
-		log_error = conf.get('log_error', True)
-
 
 		if expression:
 
@@ -62,43 +52,17 @@ class Evaluate(classes.processor.Processor):
 			
 			if debug:
 				print(expression)
-				
-			if log_error:
-								
-				if eval(expression):
-					
-					if debug:
-						print("True")
-					
-					return True
-					
-				else:
-					
-					if debug:
-						print("False")
-					
-					return False
 			
+			if eval(expression):
+				
+				if debug:
+					print("True")
+				
+				return True
+				
 			else:
 				
-				try:
-					if eval(expression):
-						
-						if debug:
-							print("True")
-						
-						return True
-						
-					else:
-						
-						if debug:
-							print("False")
-						
-						return False					
+				if debug:
+					print("False")
 				
-				except SyntaxError:
-					return False
-					
-				
-				
-				
+				return False

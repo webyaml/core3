@@ -1,16 +1,7 @@
 # path: lib/processors
 # filename: dataObj.py
-# description: WSGI application data store processors
+# description: processors to manipulate Data Objects in temporary storage
 ''' 
-# make python2 strings and dictionaries behave like python3
-from __future__ import unicode_literals
-
-try:
-	from builtins import dict, str
-except ImportError:
-	from __builtin__ import dict, str
-	
-
 	Copyright 2017 Mark Madere
 
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,17 +30,17 @@ class Create(classes.processor.Processor):
 	
 	def run(self):
 		
+		name = 'lib.processors.dataObj.Create'
+		
 		conf = self.conf
 		debug = False
 		
 		if conf.get('debug'):
-		
-			print('lib.processors.dataObj.Create')
+			print(name)
 			debug = True
 		
 		if not conf.get('data'):
-			
-			print('data not in conf')
+			print('%s - missing attribute data'%name)
 			return False
 			
 		# load data
@@ -130,30 +121,15 @@ class Modify(classes.processor.Processor):
 				print('merge')
 			
 			if eval('isinstance(self.content.dataObj%s, dict)' %entry):
-				
-				if debug:
-					print('source is a dict')				
 			
 				# merge with top item
 				exec('self.content.dataObj%s.update(self.content.data)' %entry)
 				
 			if eval('isinstance(self.content.dataObj%s, list)' %entry):
-				
-				if debug:
-					print('source is a list')
-					
-				if conf['source']['merge'] == 'append':
-					exec('self.content.dataObj%s.append(self.content.data)' %entry)
-					
-				else:
-					# merge with top item
-					exec('self.content.dataObj%s.extend(self.content.data)' %entry)
+				# merge with top item
+				exec('self.content.dataObj%s.extend(self.content.data)' %entry)
 				
 			if eval('isinstance(self.content.dataObj%s, str)' %entry):
-				
-				if debug:
-					print('source is a str')				
-				
 				# merge with top item
 				exec('self.content.dataObj%s += self.content.data' %entry)
 			

@@ -1,16 +1,8 @@
 # path: lib/processors
 # filename: shell.py
 # description: WSGI application shell processors
+
 ''' 
-# make python2 strings and dictionaries behave like python3
-from __future__ import unicode_literals
-
-try:
-	from builtins import dict, str
-except ImportError:
-	from __builtin__ import dict, str
-	
-
 	Copyright 2017 Mark Madere
 
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -63,86 +55,52 @@ class Shell(classes.processor.Processor):
 			print('running command: %s' %cmd)
 		
 		
-		if conf.get('background'):
+		try:	
+			result = subprocess.check_output(cmd, shell=True)
 			
-			try:
-				
-				subprocess.Popen(cmd, shell=True)
-				
-				return True
-				
+			# debug
+			if debug:
+				print('stdout')
+				print(result)
 			
-			except subprocess.CalledProcessError as e:
-
-				self.top.cache['stdout'] = e
+			# handle the stdout
+			if conf.get('stdout'):
 				
-				if debug:
-					print('stderr')
-					print(e)
-			
-				# handle the stdout
-				if conf.get('stderr'):
+				conf['stdout']['value'] = result
+				
+				conf['stdout']['format'] = conf['stdout'].get('format','string')
+				
+				# load data
+				if not self.content.load_data(conf['stdout']):
 					
-					conf['stderr']['value'] = e
-					
-					conf['stderr']['format'] = conf['stderr'].get('format','string')
-					
-					# load data
-					if not self.content.load_data(conf['stderr']):
+					print('failed to save - data failed to load')
 						
-						print('failed to save - data failed to load')
-							
-						return False
-
-				return False			
+					return False
 			
-		else: 
-			try:	
-				result = subprocess.check_output(cmd, shell=True)
-				
-				# debug
-				if debug:
-					print('stdout')
-					print(result)
-				
-				# handle the stdout
-				if conf.get('stdout'):
-					
-					conf['stdout']['value'] = result
-					
-					conf['stdout']['format'] = conf['stdout'].get('format','string')
-					
-					# load data
-					if not self.content.load_data(conf['stdout']):
-						
-						print('failed to save - data failed to load')
-							
-						return False
-				
-				return True
-				
-			except subprocess.CalledProcessError as e:
-
-				self.top.cache['stdout'] = e
-				
-				if debug:
-					print('stderr')
-					print(e)
+			return True
 			
-				# handle the stdout
-				if conf.get('stderr'):
-					
-					conf['stderr']['value'] = e
-					
-					conf['stderr']['format'] = conf['stderr'].get('format','string')
-					
-					# load data
-					if not self.content.load_data(conf['stderr']):
-						
-						print('failed to save - data failed to load')
-							
-						return False
+		except subprocess.CalledProcessError as e:
 
-				return False
+			self.top.cache['stdout'] = e
+			
+			if debug:
+				print('stderr')
+				print(e)
 		
+			# handle the stdout
+			if conf.get('stderr'):
+				
+				conf['stderr']['value'] = e
+				
+				conf['stderr']['format'] = conf['stderr'].get('format','string')
+				
+				# load data
+				if not self.content.load_data(conf['stderr']):
+					
+					print('failed to save - data failed to load')
+						
+					return False
+
+			return False
+			
 		return False

@@ -2,15 +2,6 @@
 # filename: functions.py
 # description: WSGI application marker functions
 ''' 
-# make python2 strings and dictionaries behave like python3
-from __future__ import unicode_literals
-
-try:
-	from builtins import dict, str
-except ImportError:
-	from __builtin__ import dict, str
-	
-
 	Copyright 2017 Mark Madere
 
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -67,7 +58,6 @@ marker_map = {
 	#'remove': 'self.view.mmethods.mm_remove', #undocumented
 	'dollar': 'self.view.mmethods.mm_dollar', #undocumented
 	'strip_dollar': 'self.view.mmethods.mm_dollar', #undocumented
-	'escape_backtick': 'self.view.mmethods.mm_escape_backtick',
 	
 	
 	#'tab': 'self.view.mmethods.mm_tab',
@@ -118,7 +108,7 @@ def mm_int(self,obj):
 	#debug
 	#print('int')
 	
-	if isinstance(obj, basestring) and obj.strip().isdigit():
+	if isinstance(obj,str) and obj.strip().isdigit():
 		return int(obj)
 		
 	return obj
@@ -129,7 +119,7 @@ def mm_split(self,obj):
 	#debug
 	#print('split')
 	
-	if isinstance(obj, basestring):
+	if isinstance(obj,str):
 	
 		delimiter = self.attributes.get('delimiter', " ")
 		return obj.split(delimiter)
@@ -141,7 +131,7 @@ def mm_space2p20(self,obj):
 	#debug
 	#print('space2p20')
 	
-	if isinstance(obj, basestring):
+	if isinstance(obj,str):
 	
 		return obj.replace(" ","%20")
 		
@@ -168,14 +158,14 @@ def mm_sha256(self,password):
 def mm_md5(self,password):
 	
 	if not password:
-		return password		
+		return password
 	
 	#debug
 	#print('md5')
 	
 	import hashlib
 	password = password.strip()
-	return hashlib.md5(password).hexdigest()
+	return hashlib.md5(password.encode('utf-8')).hexdigest()
 
 
 def mm_dollar(self,obj):
@@ -185,7 +175,7 @@ def mm_dollar(self,obj):
 
 	#debug
 	#print('dollar')
-	if isinstance(obj,basestring):
+	if isinstance(obj,str):
 		
 		obj = obj.strip()
 		
@@ -202,9 +192,9 @@ def mm_dollar(self,obj):
 	
 def mm_strip_us_phone(self,obj):
 	
-	if not isinstance(obj,basestring):
+	if not isinstance(obj,str):
 		
-		obj = unicode(obj)
+		return obj
 	
 	return obj.replace("(","").replace(")","").replace("-","").replace(" ","")
 
@@ -263,7 +253,7 @@ def mm_exists(self,obj):
 	#print('exists')
 	#print('obj:'+str(obj))
 	
-	if isinstance(obj, basestring) and obj != '':
+	if isinstance(obj,str) and obj != '':
 		return 'True'
 		
 	if obj:
@@ -277,7 +267,7 @@ def mm_singleline(self,obj):
 	# debug
 	#print('singleline')
 	
-	if not isinstance(obj,basestring):
+	if not isinstance(obj,str):
 		
 		return ''
 		
@@ -297,7 +287,7 @@ def mm_escape_breaks(self,obj):
 	# debug
 	#print('escape_breaks')
 	
-	if not isinstance(obj,basestring):
+	if not isinstance(obj,str):
 		
 		return obj
 		
@@ -314,10 +304,6 @@ def mm_strip(self,obj):
 	#print(char)
 	#print(type(obj))
 
-	if not isinstance(obj,unicode):
-
-		obj = unicode(obj)
-
 	#obj =  obj.strip("\n").strip("\r").strip(char).strip()
 	obj =  obj.strip("\n\r%s"%char)
 
@@ -328,7 +314,6 @@ def mm_strip(self,obj):
 	#print(obj)
 
 	return obj
-
 
 
 def mm_escape(self,obj):
@@ -342,13 +327,10 @@ def mm_escape(self,obj):
 	if isinstance(obj,list):
 		string = ", ".join(obj)
 	
-	if isinstance(obj,basestring):
+	if isinstance(obj,str):
 		obj = obj.replace("'",r"\'").replace('"',r'\"').replace("#",r"\#") #.replace(u'\u2019', r"\\u2019")
 	
 	return obj
-
-
-
 
 
 def mm_html_breaks(self,obj):
@@ -360,7 +342,7 @@ def mm_html_breaks(self,obj):
 	#print('convert_breaks')
 	#print(type(obj))
 	
-	if not isinstance(obj,basestring):
+	if not isinstance(obj,str):
 		
 		return obj
 		
@@ -380,7 +362,7 @@ def mm_escape_markers(self,obj):
 	# debug
 	#print('escape_markers')
 	
-	if isinstance(obj,basestring):
+	if isinstance(obj,str):
 		obj = obj.replace("{{","\{\{").replace('}}','\}\}')
 	
 	return obj
@@ -424,7 +406,7 @@ def mm_json(self,obj):
 				
 				subobj[key] = walk(subobj[key])
 		
-		if isinstance(subobj,basestring):
+		if isinstance(subobj,str):
 			
 			subobj = self.fnr(subobj)
 		
@@ -437,7 +419,7 @@ def mm_json(self,obj):
 		# Hack
 		if isinstance(subobj,decimal.Decimal):
 			
-			subobj = unicode(subobj)
+			subobj = str(subobj)
 		
 		return subobj
 	
@@ -456,12 +438,6 @@ def mm_yaml(self,obj):
 	import json
 	import yaml		
 
-	# tweak for utf-8
-	def my_unicode_repr(self, data):
-		return self.represent_str(data.encode('utf-8'))
-	
-	yaml.representer.Representer.add_representer(unicode, my_unicode_repr)
-	
 	obj = json.loads(self.view.mmethods.mm_json(self,obj))
 	
 	return yaml.dump(obj, allow_unicode=True, default_flow_style=False)
@@ -489,7 +465,7 @@ def mm_truncate(self,obj):
 	# debug
 	#print('truncate')	
 	
-	if isinstance(obj, basestring) or isinstance(obj,list):		
+	if isinstance(obj,str) or isinstance(obj,list):		
 	
 		# length attribute
 		length = int(self.attributes.get('length',50))
@@ -499,18 +475,16 @@ def mm_truncate(self,obj):
 	return obj
 
 
-def mm_html_escape(self,obj):
-
-	# debug
-	#print('html_escape')
-	
-	import cgi
-	
-	if isinstance(obj, basestring):
-		
-		return cgi.escape(obj,quote=True).replace("{","&#123;").replace("}","&#125;").replace('\\','') #.replace('/','\/')
-	
-	return obj
+def mm_html_escape(self, obj):
+    # debug
+    #print('html_escape')
+    
+    import html
+    
+    if isinstance(obj, str):
+        return html.escape(obj, quote=True).replace("{", "&#123;").replace("}", "&#125;").replace('\\', '') #.replace('/','\/')
+    
+    return obj
 
 
 def mm_html_markers(self,obj):
@@ -518,7 +492,7 @@ def mm_html_markers(self,obj):
 	# debug
 	#print('html_markers')
 
-	if isinstance(obj, basestring):
+	if isinstance(obj,str):
 	
 		return obj.replace("{","&#123;").replace("}","&#125;")
 	
@@ -527,13 +501,15 @@ def mm_html_markers(self,obj):
 
 def mm_uuid(self,obj):
 
+	#any obj will be ignored
+	
 	# debug
 	#print('uuid')
 	
 	import uuid
 	
 	# random uuid
-	return unicode(uuid.uuid4().hex) #any obj will be ignored
+	return str(uuid.uuid4().hex) 
 
 
 def mm_url_quote(self,obj):
@@ -543,7 +519,7 @@ def mm_url_quote(self,obj):
 	# debug
 	#print('url_quote')	
 		
-	if isinstance(obj,basestring):
+	if isinstance(obj,str):
 	
 		import urllib
 		obj = urllib.quote_plus(obj)
@@ -558,7 +534,7 @@ def mm_url_unquote(self,obj):
 
 	import urllib
 
-	if isinstance(obj,basestring):
+	if isinstance(obj,str):
 
 		return urllib.unquote_plus(obj)
 
@@ -589,7 +565,7 @@ def mm_date(self,obj):
 			return obj
 	
 	# unix timestamp
-	if isinstance(obj,basestring):
+	if isinstance(obj,str):
 		
 		if not obj.isdigit():
 			
@@ -612,7 +588,7 @@ def mm_last4(self,obj):
 	if isinstance(obj,int):
 		obj = str(obj)
 	
-	if isinstance(obj,basestring):		
+	if isinstance(obj,str):		
 		
 		return "*"*(len(obj)-4)+ obj[-4:]
 	
@@ -624,7 +600,7 @@ def mm_keyword(self,obj):
 	# debug
 	#print('keyword')	
 	
-	if isinstance(obj,basestring):		
+	if isinstance(obj,str):		
 		
 		return '<mark>%s</mark>'%obj
 	
@@ -636,7 +612,7 @@ def mm_string(self,obj):
 	# debug
 	#print('string')
 	
-	return unicode(obj)
+	return str(obj)
 
 
 def mm_upper(self,obj):
@@ -644,7 +620,7 @@ def mm_upper(self,obj):
 	# debug
 	#print('string')
 	
-	return unicode(obj).upper()
+	return str(obj).upper()
 
 
 def mm_lower(self,obj):
@@ -652,7 +628,7 @@ def mm_lower(self,obj):
 	# debug
 	#print('string')
 	
-	return unicode(obj).lower()
+	return str(obj).lower()
 
 
 def mm_title_case(self,obj):
@@ -660,7 +636,7 @@ def mm_title_case(self,obj):
 	# debug
 	#print('title_case')	
 	
-	if isinstance(obj,basestring):
+	if isinstance(obj,str):
 	
 		# split the string on spaces
 		parts = obj.split()
@@ -685,9 +661,9 @@ def mm_list(self, obj):
 
 def mm_us_phone(self,obj):
 	
-	if not isinstance(obj,basestring):
+	if not isinstance(obj,str):
 		
-		obj = unicode(obj)
+		obj = str(obj)
 	
 	out = obj
 	if obj != "":
@@ -701,9 +677,9 @@ def mm_us_phone(self,obj):
 
 def mm_us_ssn(self,obj):
 	
-	if not isinstance(obj,basestring):
+	if not isinstance(obj,str):
 		
-		obj = unicode(obj)
+		obj = str(obj)
 	
 	out = "%s-%s-%s"%(obj[0:3],obj[3:5],obj[5:9])
 	
@@ -731,22 +707,10 @@ def mm_escape_script(self,obj):
 	#print('escape_script')
 	#print(type(obj))
 	
-	if isinstance(obj,basestring):
+	if isinstance(obj,str):
 		
 		return obj.replace('</script>','<\\/script>')
 	
 	#print('return default')
 	#print(obj)
 	return obj
-	
-	
-def mm_escape_backtick(self,obj):
-	if isinstance(obj,basestring):
-		
-		print('yes')
-		return obj.replace('`','\`')
-	
-	#print('return default')
-	#print(obj)
-	return obj	
-	

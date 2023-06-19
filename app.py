@@ -2,15 +2,6 @@
 # filename: app.py
 # path: /core/
 ''' 
-# make python2 strings and dictionaries behave like python3
-from __future__ import unicode_literals
-
-try:
-	from builtins import dict, str
-except ImportError:
-	from __builtin__ import dict, str
-
-
 	Copyright 2017 Mark Madere
 
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,10 +38,19 @@ except ImportError:
 import web
 import os
 import sys
+import yaml
+
+import logging
+import datetime
 
 # vars
-urls_config_file = 'conf/urls.cfg'
 web.config.debug = True
+'''
+loglevel = logging.INFO
+
+#start logging
+logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S',level=loglevel)
+'''
 first_load = False
 urls = (
 		'/favicon.ico','favicon', # pass favicon url to the favicon handler
@@ -72,6 +72,7 @@ if "framework" not in dir(web):
 	if not os.path.exists("%s/core" %web.framework['absolute_path']):
 		
 		print("The application directory does not contain a symlink to 'core'")
+		logging.critical('CRITICAL The application directory does not contain a symlink to ')
 		sys.exit(1)
 	
 	# set cwd and absolute_path
@@ -92,6 +93,24 @@ os.chdir(web.framework['cwd'])
 #print('Absolute Path: %s' %web.framework['absolute_path'])	
 #print('CWD: %s' %web.framework['cwd'])
 
+'''
+# load app.cfg
+try:
+	# parse application configuration
+	f = open('%s/app.cfg'%web.framework['cwd'],'r')
+	conf = yaml.load(f.read(), Loader=yaml.SafeLoader)
+
+	# apply log level
+	if conf.get('log_level'):
+		logging.getLogger().setLevel(conf['log_level'].upper())
+		print('log_level is now %s'%conf['log_level'].upper())
+
+	f.close()
+	
+except:
+	print('no app.cfg found')
+	pass
+'''
 
 ''' internal imports
 '''
@@ -105,11 +124,13 @@ import classes.view
 if first_load:
 	
 	# debug
-	print('starting new thread for application')
+	timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+	# log
+	print('%s [WEBYAML] Starting new thread for application'%timestamp)
 	
 	web.framework['configuration_object'] = classes.configuration.Configuration()
-
-
+	
 ''' Classes
 '''
 # favicon handler
@@ -133,8 +154,12 @@ class AB:
 '''	Main
 '''
 if __name__ == "__main__":
-	
-	print("Starting CherryPy server")
+
+	# debug
+	timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+	# log
+	print('%s [WEBYAML] Starting CherryPy server'%timestamp)
 	
 	app = web.application(urls, globals())
 

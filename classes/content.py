@@ -1,16 +1,7 @@
-# path: core/
+# path: core/classes/
 # filename: content.py
 # description: WSGI application content tree
 ''' 
-# make python2 strings and dictionaries behave like python3
-from __future__ import unicode_literals
-
-try:
-	from builtins import dict, str
-except ImportError:
-	from __builtin__ import dict, str
-	
-
 	Copyright 2017 Mark Madere
 
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -60,6 +51,7 @@ class Content(list):
 		self.top = self.parent.top # top object
 		
 		self.view = self.top #migrate to this instead of top
+		
 		
 		self.elementObj = None # placeholder for elementObj
 		self.data = None
@@ -174,8 +166,6 @@ class Content(list):
 						# are we in a list?  how to handle differntly
 						continue
 						
-						
-						
 				# if process returns something other than false make it false
 				else:
 					
@@ -183,8 +173,8 @@ class Content(list):
 			
 			except: traceback.print_exc()
 		
-		
 		return True
+	
 
 	def loadmodule(self,m,c):
 		
@@ -251,7 +241,7 @@ class Content(list):
 		
 		# Vars
 		
-		if isinstance(conf,basestring) :
+		if isinstance(conf,str) :
 			
 			print("Warn: classes.content.tree() performing eval()")
 			conf = eval(conf)
@@ -267,18 +257,8 @@ class Content(list):
 				try:
 					self.append( Content(self,item) )
 					
-					'''
-					except MyError:
-					
-						item = {errorcontent}
-						self.append(Content(self,item))
-					
-					'''
-					
-					
 				except: traceback.print_exc()
-		
-		
+			
 		return None
 
 
@@ -295,11 +275,6 @@ class Content(list):
 		if not _class:
 			
 			return False
-
-
-		# instanciate Element object
-		#self.elementObj = _class(self)
-
 		
 		# making an exception for calling processor instead of element
 		
@@ -360,7 +335,6 @@ Try this content block instead:
 '''
 			
 			self.attributes['e']['suggestedcode'] = {"process": orginal_conf}
-			#self.attributes['e']['stack'] = traceback.format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback,10)
 			
 			return self.init_element()
 		
@@ -387,12 +361,10 @@ Try this content block instead:
 			print(self.fnr(self.attributes['log']))
 		
 		# render this element
-		output = unicode(self.elementObj.render())+output
+		output = self.elementObj.render() + output #python3
 		
 		# split wrap
-		wrap_delimiter = self.attributes.get('wrap_delimiter','|')
-		
-		wrap = self.fnr(self.attributes.get('wrap',wrap_delimiter)).split(wrap_delimiter,1)
+		wrap = self.attributes.get('wrap','|').split("|",1)
 		if len(wrap) == 1:
 			wrap.append('')
 		
@@ -445,9 +417,6 @@ Try this content block instead:
 
 	def fnr(self,template,limit=10,**kwargs):
 		
-		#debug
-		#print(self.marker_map)
-		
 		binary = False
 		if 'binary' in kwargs:
 			print('binary')
@@ -476,8 +445,10 @@ Try this content block instead:
 			
 			# does this template include any markers?
 			try:
-				start = unicode(template_copy).index('{{')
-				end = unicode(template_copy).index('}}',start)
+
+				start = template_copy.index('{{') #python3
+				end = template_copy.index('}}',start) #python3
+
 			
 			# no markers found, return input
 			except ValueError:
@@ -706,24 +677,17 @@ Try this content block instead:
 						
 					elif raw:
 						
+						'''
+							I am not sure what i made this hack for.  need to find the original use case.
+						'''
+						
 						#print("raw")
 						
 						return markup_value
 						
 					else:
-					
-						if not isinstance(markup_value,unicode):
-							
-							try:
-							
-								markup_value = unicode(markup_value)
-								
-							except UnicodeDecodeError:
-								
-								markup_value = unicode(markup_value.decode('UTF-8'))
-								
 
-						template = template.replace(u"{{%s}}" %marker, markup_value)
+						template = template.replace("{{%s}}"%marker, str(markup_value)) #python3
 				
 				'''debug - warning: lots of output, but this is useful if you need to see
 					markups at this granular level.
@@ -806,7 +770,7 @@ Try this content block instead:
 		# data
 		data = conf['value']
 		
-		if isinstance(data,basestring) and 'nomarkup' not in conf:
+		if isinstance(data,str) and 'nomarkup' not in conf:
 			
 			# markup data
 			data = self.fnr(data)
@@ -958,7 +922,7 @@ Try this content block instead:
 			
 			#print('format is string')
 			
-			self.data = unicode(data)
+			self.data = data
 		
 
 		# yaml
@@ -982,7 +946,7 @@ Try this content block instead:
 			import yaml
 			
 			try:
-				self.data = yaml.load(data)
+				self.data = yaml.load(data, Loader=yaml.SafeLoader)
 			
 			except: traceback.print_exc()	
 			
@@ -991,7 +955,7 @@ Try this content block instead:
 			
 			#print('format is default')
 			
-			self.data = unicode(data)
+			self.data = data
 
 
 		# entry point
@@ -1056,7 +1020,7 @@ Try this content block instead:
 						# extend list with items
 						exec('self.%s.extend(self.data)' %conf['store2'])
 
-				if eval('isinstance(self.%s, basestring)' %conf['store2']):
+				if eval('isinstance(self.%s, str)' %conf['store2']):
 				
 					# append item to string
 					exec('self.%s += self.data' %conf['store2'])
@@ -1099,7 +1063,7 @@ Try this content block instead:
 						# debug
 						#print('extended top.%s with self.data' %conf['store'])
 
-				if eval('isinstance(self.%s, basestring)' %conf['store2']):
+				if eval('isinstance(self.%s, str)' %conf['store2']):
 				
 					# merge with top item
 					exec('self.%s += self.data' %conf['store2'])
@@ -1128,8 +1092,6 @@ Try this content block instead:
 	def colon_seperated_to_brackets(self,input):
 
 		if input != "":
-		
-			input = unicode(input)
 		
 			# format input into a bracketed format
 			
@@ -1170,5 +1132,3 @@ Try this content block instead:
 			return output
 			
 		return input
-			
-	

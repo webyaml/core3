@@ -1,16 +1,7 @@
-# path: 
-# filename: url.py
-# description: application URL class
+# path: core/classes/
+# filename: view.py
+
 ''' 
-# make python2 strings and dictionaries behave like python3
-from __future__ import unicode_literals
-
-try:
-	from builtins import dict, str
-except ImportError:
-	from __builtin__ import dict, str
-	
-
 	Copyright 2017 Mark Madere
 
 	Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,6 +26,11 @@ import datetime
 import os
 import re
 
+import logging
+
+
+
+
 ''' internal imports
 '''
 import classes.content
@@ -45,12 +41,14 @@ import lib.marker.methods
 class View(object):
 	
 	def __init__(self):
+		
+		#start logging
+		loglevel = logging.INFO
+		logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S',level=loglevel)		
 
 		''' vars
 		'''
-		
 		self.error = None # is this still used?
-		
 		
 		# timestamp - used by debug
 		self.start_time = datetime.datetime.now()
@@ -90,7 +88,7 @@ class View(object):
 			# Attributes
 			
 			# Caches
-			'cache': 'self.top.cache',
+			'cache': 'self.top.cache', # this should be depricated
 			'session': 'self.top.session.vars',
 			
 			# URI/GET/POST
@@ -98,8 +96,8 @@ class View(object):
 			'get': 'self.top.get_vars',
 			'post': 'self.top.post_vars',
 			'getpost': 'self.top.getpost_vars',
-			'raw': 'self.top.raw',		
-			'header': 'self.top.header',
+			'raw': 'self.top.raw',
+			'header': 'self.top.header',			
 
 			# ATTRIBUTES
 			'this': 'self.attributes',	
@@ -118,9 +116,9 @@ class View(object):
 	
 	
 	def GET(self,path=None):
-	
-		print('GET Request')
-	
+		
+		self.log('Received GET request','debug')
+		
 		''' vars
 		'''
 		self.path = path
@@ -138,7 +136,7 @@ class View(object):
 	
 	def POST(self,path=None):
 		
-		print('POST Request')
+		self.log('Received POST request','debug')
 	
 		# This is required to for file uploads Input
 		x = web.input()
@@ -255,12 +253,18 @@ class View(object):
 					'''	View Confiuration
 					'''
 
-					# view name - used for caching content configuration
-					self.attributes['name'] = a
-
+					'''
+						I am not sure i want this feature anymore
+						
 					# assign/update attributes - supports inheritence /1/2/ inherits from /1
-					self.attributes.update(available_urls[i][available_url])
+					self.attributes.update(available_urls[i][available_url])						
+					'''
 					
+					# view attributes
+					self.attributes = available_urls[i][available_url]
+					
+					# view name - used for caching content configuration
+					self.attributes['name'] = a					
 
 					'''	This sting to list conversion should happen at another level
 					'''
@@ -268,7 +272,7 @@ class View(object):
 					content_config_files = self.attributes.get('conf',[])
 					
 					# allow conf to be a string.  convert to list
-					if isinstance(content_config_files,basestring):
+					if isinstance(content_config_files,str):
 						content_config_files = [content_config_files]
 					
 					# update conf attribute
@@ -284,6 +288,10 @@ class View(object):
 					# remove the available url from the requested url to get the path vars
 					path_vars = requested_url_list[len(available_url_list):]
 		
+		# apply log level
+		if self.attributes.get('log_level'):
+			logging.getLogger().setLevel(self.attributes['log_level'].upper())
+			print('log_level is now %s'%self.attributes['log_level'].upper())		
 		
 		# Handle 404 errors
 		if not 'conf' in self.attributes or len(self.attributes['conf']) == 0:
@@ -341,10 +349,14 @@ class View(object):
 			self.path_vars['arg'+str(i)] = path_vars[i]
 		
 		# debug
-		print("URL: %s" % requested_url)
-		print("GET vars: "+str(dict(self.get_vars)))
-		print("POST vars: "+str(self.post_vars))
-		print("PATH vars: "+str(self.path_vars))
+		if self.get_vars:
+			self.log("GET vars: %s"%str(dict(self.get_vars)),'debug')
+
+		if self.post_vars:
+			self.log("POST vars: %s"%str(self.post_vars),'debug')
+		
+		if self.path_vars:
+			self.log("PATH vars: "+str(self.path_vars),'debug')
 
 		
 		# CACHE INPUT
@@ -397,10 +409,11 @@ class View(object):
 		
 		
 		# debug
-		print("Cache:")
-		print(self.cache)
-		print("Session:")
-		print(self.session.vars)		
+		if self.cache:
+			self.log('Cache vars: %s'%str(self.cache),'debug')
+		
+		if self.session.vars:
+			self.log('Session vars: %s'%str(self.session.vars),'debug')
 		
 		
 		'''	Unless otherwise indicated remove any remaining markers
@@ -412,8 +425,7 @@ class View(object):
 			markers = list(set(pattern.findall(output)))
 
 			for marker in markers:
-				output = unicode(output.replace(marker,''))
-
+				output = output.replace(marker,'') #python3
 		
 		'''	Extra Debugging output
 		'''
@@ -461,6 +473,7 @@ class View(object):
 		if 'debug' in self.attributes and self.attributes['debug'] == 'conf':
 			cache_file = "debug/_:_%s" %str(requested_url.strip("/").replace("/","_:_"))
 			
+			# not sure if allow_unicode=True is still needed in python3
 			debug_output = yaml.dump(self.conf, allow_unicode=True, default_flow_style=False)
 
 			try:
@@ -511,4 +524,68 @@ class View(object):
 				raise web.notfound(message_404)
 				
 		raise web.notfound()
-			
+
+
+	def	log(self, msg, level="WARNING"):
+		
+		levels = {
+			"DEBUG": logging.debug,
+			"INFO": logging.info,
+			"WARNING": logging.warning,
+			"ERROR": logging.error,
+			"CRITICAL": logging.critical,
+			#"NOTSET": pass,
+		}
+		#print(msg)
+		levels[level.upper()]('%s:%s %s "%s %s" %s'%(web.ctx.env.get('REMOTE_ADDR'),web.ctx.env.get('REMOTE_PORT'),level.upper(),web.ctx.env.get('REQUEST_METHOD'),web.ctx.env.get('REQUEST_URI'),msg))		
+
+		'''
+		web.ctx.env.get:
+		https://webpy.org/cookbook/ctx
+		
+		{
+			'ACTUAL_SERVER_PROTOCOL': 'HTTP/1.1', 
+			'PATH_INFO': '/', 
+			'QUERY_STRING': '', 
+			'REMOTE_ADDR': '10.0.0.11', 
+			'REMOTE_PORT': '33514', 
+			'REQUEST_METHOD': 'GET', 
+			'REQUEST_URI': '/', 
+			'SCRIPT_NAME': '', 
+			'SERVER_NAME': 'localhost', 
+			'SERVER_PROTOCOL': 'HTTP/1.1', 
+			'SERVER_SOFTWARE': 'Cheroot/8.3.0 Server', 
+			'wsgi.errors': <_io.TextIOWrapper name='<stderr>' mode='w' encoding='UTF-8'>, 
+			'wsgi.input': <cheroot.server.KnownLengthRFile object at 0x7fe9dce359b0>, 
+			'wsgi.input_terminated': False, 
+			'wsgi.multiprocess': False, 
+			'wsgi.multithread': True, 
+			'wsgi.run_once': False, 
+			'wsgi.url_scheme': 'http', 
+			'wsgi.version': (1, 0), 
+			'SERVER_PORT': '8080', 
+			'HTTP_HOST': '10.0.0.11:8080', 
+			'HTTP_CONNECTION': 'keep-alive', 
+			'HTTP_CACHE_CONTROL': 'max-age=0', 
+			'HTTP_UPGRADE_INSECURE_REQUESTS': '1', 
+			'HTTP_USER_AGENT': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36', 
+			'HTTP_ACCEPT': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8', 
+			'HTTP_ACCEPT_ENCODING': 'gzip, deflate', 
+			'HTTP_ACCEPT_LANGUAGE': 'en-US,en;q=0.9', 
+			'HTTP_COOKIE': 'webpy_session_id=cdfe70ffceaaa9c8ee41c5faddfdfef385cea767'
+		}
+
+		
+		
+		environ a.k.a. env - a dictionary containing the standard WSGI environment variables
+		home - the base path for the application, including any parts "consumed" by outer applications http://example.org/admin
+		homedomain - ? (appears to be protocol + host) http://example.org
+		homepath - The part of the path requested by the user which was trimmed off the current app. That is homepath + path = the path actually requested in HTTP by the user. E.g. /admin This seems to be derived during startup from the environment variable REAL_SCRIPT_NAME. It affects what web.url() will prepend to supplied urls. This in turn affects where web.seeother() will go, which might interact badly with your url rewriting scheme (e.g. mod_rewrite)
+		host - the hostname (domain) and (if not default) the port requested by the user. E.g. example.org, example.org:8080
+		ip - the IP address of the user. E.g. xxx.xxx.xxx.xxx
+		method - the HTTP method used. E.g. GET
+		path - the path requested by the user, relative to the current application. If you are using subapplications, any part of the url matched by the outer application will be trimmed off. E.g. you have a main app in code.py, and a subapplication called admin.py. In code.py, you point /admin to admin.app. In admin.py, you point /stories to a class called stories. Within stories, web.ctx.path will be /stories, not /admin/stories. E.g. /articles/845
+		protocol - the protocol used. E.g. https
+		query - an empty string if there are no query arguments otherwise a ? followed by the query string. E.g. ?fourlegs=good&twolegs=bad
+		fullpath a.k.a. path + query - the path requested including query arguments but not including homepath. E.g. /articles/845?fourlegs=good&twolegs=bad
+'''
