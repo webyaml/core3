@@ -43,6 +43,7 @@ import yaml
 import logging
 import datetime
 
+'''
 from wsgilog import WsgiLog
 
 class Log(WsgiLog):
@@ -57,6 +58,7 @@ class Log(WsgiLog):
 		    #interval = config.log_interval,
 		    #backups = config.log_backups
 		    )
+'''
 
 # vars
 web.config.debug = True
@@ -205,7 +207,7 @@ elif __name__.startswith('_mod_wsgi_'):
 	session = web.session.Session(app, web.session.DiskStore('sessions'))
 	app.add_processor(web.loadhook(session_hook))
 	application = app.wsgifunc()
-	app.run(Log)
+	#app.run(Log)
 	
 	# End File sessions
 	
