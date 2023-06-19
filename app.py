@@ -53,7 +53,7 @@ class Log(WsgiLog):
 		    logformat = '%(message)s',
 		    tofile = True,
 		    toprint = True,
-		    file = '/var/log/httpd/test.log',
+		    file = 'test.log',
 		    #interval = config.log_interval,
 		    #backups = config.log_backups
 		    )
