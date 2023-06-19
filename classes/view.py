@@ -44,11 +44,8 @@ class View(object):
 	def __init__(self):
 		
 		#start logging
-		loglevel = logging.INFO
-		
-		
-		
-		logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S',level=loglevel, stream=logging.StreamHandler(sys.stdout))		
+		loglevel = logging.DEBUG
+		logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=loglevel)		
 
 		''' vars
 		'''
