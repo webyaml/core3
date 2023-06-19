@@ -43,6 +43,21 @@ import yaml
 import logging
 import datetime
 
+from wsgilog import WsgiLog
+
+class Log(WsgiLog):
+	def __init__(self, application):
+		WsgiLog.__init__(
+		    self,
+		    application,
+		    logformat = '%(message)s',
+		    tofile = True,
+		    toprint = True,
+		    file = '/var/log/http/test.log',
+		    #interval = config.log_interval,
+		    #backups = config.log_backups
+		    )
+
 # vars
 web.config.debug = True
 '''
@@ -190,6 +205,7 @@ elif __name__.startswith('_mod_wsgi_'):
 	session = web.session.Session(app, web.session.DiskStore('sessions'))
 	app.add_processor(web.loadhook(session_hook))
 	application = app.wsgifunc()
+	application.run(Log)
 	# End File sessions
 	
 	'''
