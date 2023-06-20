@@ -103,7 +103,7 @@ except:
 # apply log level
 if web.framework['config'].get('log_level'):
 	
-	web.framework['log_level'] = %web.framework['config']['log_level'].upper()
+	web.framework['log_level'] = web.framework['config']['log_level'].upper()
 	print('Global log_level is now %s'%web.framework['config']['log_level'])
 	
 	#logging.getLogger().setLevel(conf['log_level'].upper())
