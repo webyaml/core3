@@ -305,6 +305,8 @@ class View(object):
 			#logging.getLogger().setLevel(self.attributes['log_level'].upper())
 			print('View log_level is now %s'%self.log_level)
 		else:
+			print('Setting log level to CRITICAL')
+			
 			self.log_level = 'CRITICAL' 
 
 		''' Custom Headers
