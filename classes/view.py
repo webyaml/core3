@@ -27,11 +27,6 @@ import os
 import re
 import sys
 
-import logging
-
-
-
-
 ''' internal imports
 '''
 import classes.content
@@ -45,10 +40,6 @@ class View(object):
 		
 		#start logging
 		self.log_level = 'CRITICAL' 
-		
-		
-		#loglevel = logging.INFO
-		#logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=loglevel)		
 
 		''' vars
 		'''
@@ -68,7 +59,6 @@ class View(object):
 		
 		# urls.cfg
 		self.urls_config_file = 'conf/urls.cfg'
-		
 		
 		# top/view Vars
 		self.path_vars = {}
@@ -538,18 +528,6 @@ class View(object):
 		
 		level = level.upper()
 		
-		levels = {
-			"DEBUG": logging.debug,
-			"INFO": logging.info,
-			"WARNING": logging.warning,
-			"ERROR": logging.error,
-			"CRITICAL": logging.critical,
-			#"NOTSET": pass,
-		}
-		
-		# global log level
-		# web.framework['log_level']
-		
 		_levels = {
 			"DEBUG": 1,
 			"INFO": 2,
@@ -563,10 +541,6 @@ class View(object):
 			
 			print('%s:%s %s "%s %s" %s'%(web.ctx.env.get('REMOTE_ADDR'),web.ctx.env.get('REMOTE_PORT'),level.upper(),web.ctx.env.get('REQUEST_METHOD'),web.ctx.env.get('REQUEST_URI'),msg))		
 		
-		
-		#print(msg)
-		#levels[level.upper()]('%s:%s %s "%s %s" %s'%(web.ctx.env.get('REMOTE_ADDR'),web.ctx.env.get('REMOTE_PORT'),level.upper(),web.ctx.env.get('REQUEST_METHOD'),web.ctx.env.get('REQUEST_URI'),msg))		
-
 		'''
 		web.ctx.env.get:
 		https://webpy.org/cookbook/ctx

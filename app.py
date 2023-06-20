@@ -40,7 +40,7 @@ import os
 import sys
 import yaml
 
-import logging
+#import logging
 import datetime
 
 # vars

@@ -467,9 +467,6 @@ value: |
 		
 		level = level.upper()
 		
-		# global log level
-		# web.framework['log_level']
-		
 		_levels = {
 			"DEBUG": 1,
 			"INFO": 2,
