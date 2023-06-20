@@ -44,13 +44,8 @@ import logging
 import datetime
 
 # vars
-web.config.debug = True
-'''
-loglevel = logging.INFO
 
-#start logging
-logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S',level=loglevel)
-'''
+
 first_load = False
 urls = (
 		'/favicon.ico','favicon', # pass favicon url to the favicon handler
@@ -72,13 +67,13 @@ if "framework" not in dir(web):
 	if not os.path.exists("%s/core" %web.framework['absolute_path']):
 		
 		print("The application directory does not contain a symlink to 'core'")
-		logging.critical('CRITICAL The application directory does not contain a symlink to ')
 		sys.exit(1)
 	
 	# set cwd and absolute_path
 	web.framework['cwd'] = web.framework['absolute_path']
 	web.framework['absolute_path'] = "%s/core" %web.framework['absolute_path']
 	
+	web.framework['log_level'] = "INFO"
 	
 	# mark that this is the first load of the thread
 	first_load = True
@@ -93,24 +88,36 @@ os.chdir(web.framework['cwd'])
 #print('Absolute Path: %s' %web.framework['absolute_path'])	
 #print('CWD: %s' %web.framework['cwd'])
 
-'''
+
 # load app.cfg
 try:
 	# parse application configuration
-	f = open('%s/app.cfg'%web.framework['cwd'],'r')
-	conf = yaml.load(f.read(), Loader=yaml.SafeLoader)
-
-	# apply log level
-	if conf.get('log_level'):
-		logging.getLogger().setLevel(conf['log_level'].upper())
-		print('log_level is now %s'%conf['log_level'].upper())
-
+	f = open('app.cfg','r')
+	web.framework['config'] = yaml.load(f.read(), Loader=yaml.SafeLoader)
 	f.close()
 	
 except:
-	print('no app.cfg found')
-	pass
-'''
+	web.framework['config'] = {}
+
+
+# apply log level
+if web.framework['config'].get('log_level'):
+	
+	web.framework['log_level'] = %web.framework['config']['log_level'].upper()
+	print('Global log_level is now %s'%web.framework['config']['log_level'])
+	
+	#logging.getLogger().setLevel(conf['log_level'].upper())
+else:
+	web.framework['log_level'] = 'INFO'
+	
+if web.framework['config'].get('webpy_debug'):
+
+	web.config.debug = web.framework['config']['webpy_debug']
+	
+else
+	
+	web.config.debug = True
+
 
 ''' internal imports
 '''
@@ -190,7 +197,6 @@ elif __name__.startswith('_mod_wsgi_'):
 	session = web.session.Session(app, web.session.DiskStore('sessions'))
 	app.add_processor(web.loadhook(session_hook))
 	application = app.wsgifunc()
-	
 	# End File sessions
 	
 	'''

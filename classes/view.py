@@ -289,11 +289,6 @@ class View(object):
 					# remove the available url from the requested url to get the path vars
 					path_vars = requested_url_list[len(available_url_list):]
 		
-		# apply log level
-		if self.attributes.get('log_level'):
-			logging.getLogger().setLevel(self.attributes['log_level'].upper())
-			print('log_level is now %s'%self.attributes['log_level'].upper())		
-		
 		# Handle 404 errors
 		if not 'conf' in self.attributes or len(self.attributes['conf']) == 0:
 
@@ -301,6 +296,16 @@ class View(object):
 			
 			return self.error404()
 
+
+		# apply log level
+		if self.attributes.get('log_level'):
+			
+			self.log_level = self.attributes['log_level']
+			
+			#logging.getLogger().setLevel(self.attributes['log_level'].upper())
+			print('View log_level is now %s'%self.attributes['log_level'].upper())
+		else:
+			self.log_level = 'CRITICAL' 
 
 		''' Custom Headers
 		'''
@@ -537,8 +542,26 @@ class View(object):
 			"CRITICAL": logging.critical,
 			#"NOTSET": pass,
 		}
+		
+		# global log level
+		# web.framework['log_level']
+		
+		_levels = {
+			"DEBUG": 1,
+			"INFO": 2,
+			"WARNING": 3,
+			"ERROR": 4,
+			"CRITICAL": 5,
+			#"NOTSET": pass,
+		}
+		
+		if _levels[level] >= _levels[web.framework['log_level']] or _levels[level] >= _levels[self.log_level] :
+			
+			print('%s:%s %s "%s %s" %s'%(web.ctx.env.get('REMOTE_ADDR'),web.ctx.env.get('REMOTE_PORT'),level.upper(),web.ctx.env.get('REQUEST_METHOD'),web.ctx.env.get('REQUEST_URI'),msg))		
+		
+		
 		#print(msg)
-		levels[level.upper()]('%s:%s %s "%s %s" %s'%(web.ctx.env.get('REMOTE_ADDR'),web.ctx.env.get('REMOTE_PORT'),level.upper(),web.ctx.env.get('REQUEST_METHOD'),web.ctx.env.get('REQUEST_URI'),msg))		
+		#levels[level.upper()]('%s:%s %s "%s %s" %s'%(web.ctx.env.get('REMOTE_ADDR'),web.ctx.env.get('REMOTE_PORT'),level.upper(),web.ctx.env.get('REQUEST_METHOD'),web.ctx.env.get('REQUEST_URI'),msg))		
 
 		'''
 		web.ctx.env.get:
