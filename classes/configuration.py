@@ -55,12 +55,11 @@ class Configuration(object):
 		
 		available_urls = self.load(*files)
 		
+		print(available_urls)
+		
 		# modify urls to include aliases
 		tmp_available_urls = []
 		for item in available_urls:
-			
-			print(item)
-			
 			
 			# new syntax
 			if 'path' in item:
