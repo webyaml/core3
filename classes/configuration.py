@@ -55,7 +55,7 @@ class Configuration(object):
 		
 		available_urls = self.load(*files)
 		
-		print(available_urls)
+		#print(available_urls)
 		
 		# modify urls to include aliases
 		tmp_available_urls = []
@@ -89,7 +89,7 @@ class Configuration(object):
 							tmp_available_urls.append(tmp_item)
 
 
-		print(tmp_available_urls)
+		#print(tmp_available_urls)
 		
 		# create an index of the urls
 		url_index = []
