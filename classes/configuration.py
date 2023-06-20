@@ -306,7 +306,7 @@ value: |
 					#print("found file '%s' in local dir" % file)
 					#print("reading '%s'" %file)
 					#self.view.log("reading '%s'" %file,'info')
-					logging.info('INFO Loading file "%s"' %file)
+					self.log('Loading file "%s"' %file, 'info')
 
 					# read config file
 					f = open(file, 'r')
@@ -322,7 +322,8 @@ value: |
 				elif os.path.isfile("core/%s" % file):
 					
 					#print("reading '%s'" %file)
-					logging.info('INFO Loading file "%s"' %file)
+					#logging.info('INFO Loading file "%s"' %file)
+					self.log('Loading file "%s"' %file, 'info')
 					
 					#debug
 					#print("found file '%s' in core dir" % file)				
@@ -342,7 +343,8 @@ value: |
 					
 					# debug
 					#print('Config Error:  The configuration file %s was not found.'% file)
-					logging.error('ERROR  File not found "%s"'%file)
+					#logging.error('ERROR  File not found "%s"'%file)
+					self.log('File not found "%s"' %file, 'error')
 					
 					return False
 			
@@ -461,4 +463,23 @@ value: |
 
 %s''' %(str(e),tmp_content)
 
-
+	def	log(self, msg, level="WARNING"):
+		
+		level = level.upper()
+		
+		# global log level
+		# web.framework['log_level']
+		
+		_levels = {
+			"DEBUG": 1,
+			"INFO": 2,
+			"WARNING": 3,
+			"ERROR": 4,
+			"CRITICAL": 5,
+			#"NOTSET": pass,
+		}
+		
+		if _levels[level] >= _levels[web.framework['log_level']] :
+			
+			print('%s:%s %s "%s %s" %s'%(web.ctx.env.get('REMOTE_ADDR'),web.ctx.env.get('REMOTE_PORT'),level.upper(),web.ctx.env.get('REQUEST_METHOD'),web.ctx.env.get('REQUEST_URI'),msg))		
+	
