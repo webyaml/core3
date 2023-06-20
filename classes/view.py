@@ -534,6 +534,8 @@ class View(object):
 
 	def	log(self, msg, level="WARNING"):
 		
+		level = level.upper()
+		
 		levels = {
 			"DEBUG": logging.debug,
 			"INFO": logging.info,
