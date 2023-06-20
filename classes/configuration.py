@@ -59,12 +59,12 @@ class Configuration(object):
 		tmp_available_urls = []
 		for item in available_urls:
 			
+			print(item)
+			
 			
 			# new syntax
 			if 'path' in item:
 				
-				#tmp = {}
-				#tmp[item['path']] = item
 				item = {item['path']: item}
 			
 			# old syntax
