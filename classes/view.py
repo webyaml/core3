@@ -44,8 +44,11 @@ class View(object):
 	def __init__(self):
 		
 		#start logging
-		loglevel = logging.INFO
-		logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=loglevel)		
+		self.log_level = 'CRITICAL' 
+		
+		
+		#loglevel = logging.INFO
+		#logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=loglevel)		
 
 		''' vars
 		'''
@@ -304,10 +307,7 @@ class View(object):
 			
 			#logging.getLogger().setLevel(self.attributes['log_level'].upper())
 			print('View log_level is now %s'%self.log_level)
-		else:
-			print('Setting log level to CRITICAL')
-			
-			self.log_level = 'CRITICAL' 
+
 
 		''' Custom Headers
 		'''
