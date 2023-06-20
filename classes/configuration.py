@@ -61,21 +61,6 @@ class Configuration(object):
 		tmp_available_urls = []
 		for item in available_urls:
 			
-			'''
-			[
-				{'/': {'conf': 'conf/hello.cfg'}}, 
-				{'/two': {'conf': 'conf/hello.cfg', 'log_level': 'debug', 'alias': '/three'}}, 
-				{'/three': {'conf': 'conf/hello.cfg', 'log_level': 'debug', 'alias': '/three'}}
-			]
-			'''
-			
-			'''
-			[
-				{'path': '/', 'conf': 'conf/hello.cfg'}, 
-				{'path': '/two', 'conf': 'conf/hello.cfg'}
-			]
-			'''
-			
 			# new syntax
 			if 'path' in item:
 				
