@@ -88,6 +88,9 @@ class Configuration(object):
 							
 							tmp_available_urls.append(tmp_item)
 
+
+		print(tmp_available_urls)
+		
 		# create an index of the urls
 		url_index = []
 		for item in tmp_available_urls:
