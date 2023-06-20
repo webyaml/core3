@@ -114,7 +114,7 @@ if web.framework['config'].get('webpy_debug'):
 
 	web.config.debug = web.framework['config']['webpy_debug']
 	
-else
+else:
 	
 	web.config.debug = True
 
