@@ -64,7 +64,7 @@ class Configuration(object):
 			# new syntax
 			if 'path' in item:
 				
-				item = {item['path']: item}
+				item[item['path']] = item
 			
 			# old syntax
 			for path in item:
