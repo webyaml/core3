@@ -300,10 +300,10 @@ class View(object):
 		# apply log level
 		if self.attributes.get('log_level'):
 			
-			self.log_level = self.attributes['log_level']
+			self.log_level = self.attributes['log_level'].upper()
 			
 			#logging.getLogger().setLevel(self.attributes['log_level'].upper())
-			print('View log_level is now %s'%self.attributes['log_level'].upper())
+			print('View log_level is now %s'%self.log_level)
 		else:
 			self.log_level = 'CRITICAL' 
 
